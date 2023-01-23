@@ -1,6 +1,5 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
-import {Chart, LogarithmicScale, registerables} from 'chart.js';
-import { Covid } from 'src/app/interfaces/covid';
+import {Chart, registerables} from 'chart.js';
 import { ServicesService } from 'src/app/services.service';
 
 @Component({
@@ -8,52 +7,34 @@ import { ServicesService } from 'src/app/services.service';
   templateUrl: './bar-chart.component.html',
   styleUrls: ['./bar-chart.component.css']
 })
-export class BarChartComponent implements AfterViewInit {
+export class BarChartComponent implements OnInit, AfterViewInit {
 public chart: any;
-info = [''];
-cases = [''];
+countries: string[] = [];
+cases: string[] = []
 
   constructor(private service: ServicesService) {
     Chart.register(...registerables)
    }
 
   ngOnInit(): void {
-    
-    // this.service.getDataStatistics().subscribe(
-    //   data => console.log(this.info = data.response)
-    // )
-    this.service.getDataFiltered().subscribe((resp) => {
-      console.log(resp)
-      // resp.map(({Country_text, Total_Cases_text}:any) => {
-      //   this.info.push(Country_text);
-      //   this.cases.push(Total_Cases_text)
-        
-      // })
-      
-      
-//       resp.forEach(({Country_text, Total_Cases_text}: any) => {
-// //SE METEN LOS PAÍSES
-//         this.info.push(Country_text);
-//         console.log(this.info);
-        
-// //POR QUÉ ES UNDEFINEEEEEEEDDDDDDDDDDDDD
-//         this.cases.push(Total_Cases_text)
-//       })
+    this.service.getDataFiltered().subscribe((resp)=> {
+      resp.forEach(({continent, cases}:any) => {
+        this.countries.push(continent)
+        this.cases.push(cases)
+      })
     })
   }
 
   ngAfterViewInit(): void {
-    //Called after ngAfterContentInit when the component's view has been initialized. Applies to components only.
-    //Add 'implements AfterViewInit' to the class.
     this.createChart();
   }
+
   createChart(){
-  
     this.chart = new Chart("MyBarChart", {
       type: 'bar', //this denotes tha type of chart
 
       data: {// values on X-Axis
-        labels: this.info, 
+        labels: this.countries, 
 	       datasets: [
           {
             label: "Contagios",
@@ -68,10 +49,4 @@ cases = [''];
       
     });
   } 
-
-test() {
-  console.log(this.info)
-}
-
-
 }
