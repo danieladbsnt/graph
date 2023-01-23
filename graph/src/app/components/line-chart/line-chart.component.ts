@@ -7,36 +7,38 @@ import { ServicesService } from 'src/app/services.service';
   templateUrl: './line-chart.component.html',
   styleUrls: ['./line-chart.component.css']
 })
-export class LineChartComponent implements AfterViewInit {
+export class LineChartComponent implements OnInit, AfterViewInit {
 public chart: any;
+countries: string[] = [];
+cases: string[] = [];
 
   constructor(private service: ServicesService) {
     Chart.register(...registerables)
    }
 
   ngOnInit(): void {
-    
+    this.service.getDataFiltered().subscribe((resp) => {
+      resp.forEach(({continent, cases}: any) => {
+        this.countries.push(continent)
+        this.cases.push(cases)
+      })
+    })
   }
 
 ngAfterViewInit(): void {
-  //Called after ngAfterContentInit when the component's view has been initialized. Applies to components only.
-  //Add 'implements AfterViewInit' to the class.
   this.createChart();
 }
 
   createChart(){
-  
     this.chart = new Chart("MyLineChart", {
       type: 'line', //this denotes tha type of chart
 
       data: {// values on X-Axis
-        labels: ['2022-05-10', '2022-05-11', '2022-05-12','2022-05-13',
-								 '2022-05-14', '2022-05-15', '2022-05-16','2022-05-17', ], 
+        labels: this.countries, 
 	       datasets: [
           {
-            label: "Sales",
-            data: ['467','576', '572', '79', '92',
-								 '574', '573', '576'],
+            label: "Contagios",
+            data: this.cases,
             backgroundColor: 'blue'
           } 
         ]
