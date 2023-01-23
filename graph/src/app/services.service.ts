@@ -1,44 +1,33 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import { Observable, switchMap, map } from 'rxjs';
+import { Observable, switchMap, map, filter } from 'rxjs';
 import { Covid } from './interfaces/covid';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ServicesService {
-data: any;
-  constructor(private http: HttpClient) { }
+cases!: number;
+countries!: string;
 
-  headers = new HttpHeaders({
-    'X-RapidAPI-Host': 'covid-19-tracking.p.rapidapi.com',
-    'X-RapidAPI-Key': '573c47378amshbab078a7752d8fep197e84jsnaefcb30ed498'
-  });
+  constructor(private http: HttpClient) { }
   
   getData(): Observable<Covid> {
-    return this.http.get<Covid>('https://covid-19-tracking.p.rapidapi.com/v1', {
-      headers: this.headers
-    })
+    return this.http.get<Covid>('https://disease.sh/v3/covid-19/continents')
   }
 
-  // getDataStatistics(): Observable<any> {
-  //   return this.http.get<any>('https://covid-193.p.rapidapi.com/statistics', {
-  //     headers: this.headers
-  //   })
-  // }
-
-getDataFiltered() {
-  return this.getData().pipe(
-    switchMap((data:any) => {
-      return [
-        data
-        .map(({Country_text, Total_Cases_text}:any) => ({
-          Country_text,
-          Total_Cases_text
-        }))
-      ]
-    })
-  )
-}
+  getDataFiltered() {
+    return this.getData().pipe(
+      switchMap((data: any) => {
+        return [
+          data.map(({continent, cases}: any) => ({
+            continent,
+            cases,
+          }))
+          .filter((data: any) => !!data.cases)
+        ]
+      })
+    )
+  }
 
 }
